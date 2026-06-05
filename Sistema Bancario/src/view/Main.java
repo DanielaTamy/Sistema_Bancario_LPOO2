@@ -1,18 +1,19 @@
 package view;
 
-import javax.swing.*;
-
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import model.dao.DatabaseSeeder;
 
 public class Main {
 
     public static void main(String[] args) {
-        /*
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        DatabaseSeeder.inicializarBanco();
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -22,16 +23,5 @@ public class Main {
                 telaPrincipal.setVisible(true);
             }
         });
-    }
-    */
-
-        /* rodar no MySQL Workbench o seguinte comando:
-        CREATE DATABASE sistema_bancario_LPOOII; 
-        INFELIZMENTE, eu criei o bd com o usuario e senha root 
-        (no roadmap tava diferente, perdão) */ 
-
-        DatabaseSeeder.inicializarBanco();
-        
-        System.out.println("Fim do teste de inicialização.");
     }
 }

@@ -6,10 +6,15 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
 
+import controller.ClienteController;
 import model.*;
+import model.dao.ClienteDao;
+import model.dao.DaoType;
+import model.dao.DataFactory;
 import Utils.ButtonColumn;
 
 public class TelaManterClientes extends JFrame {
@@ -17,8 +22,12 @@ public class TelaManterClientes extends JFrame {
     private JTable tabelaClientes;
     private ClienteTableModel tableModel;
     private JTextField txtFiltro;
+    private ClienteController clienteController;
 
     public TelaManterClientes() {
+        ClienteDao clienteDao = (ClienteDao) DataFactory.getClienteDao(DaoType.SQL);
+        clienteController = new ClienteController(clienteDao);
+
         setTitle("Dashboard de Clientes do Banco");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 1100, 600); // Aumentei a largura para acomodar a nova coluna
@@ -74,14 +83,14 @@ public class TelaManterClientes extends JFrame {
 
         btnExcluir.addActionListener(e -> excluirCliente());
 
-        btnFiltrarNome.addActionListener(e -> tableModel.filtrarPorNome(txtFiltro.getText()));
-        btnFiltrarSobrenome.addActionListener(e -> tableModel.filtrarPorSobrenome(txtFiltro.getText()));
-        btnFiltrarCPF.addActionListener(e -> tableModel.filtrarPorCpf(txtFiltro.getText()));
-        btnFiltrarRG.addActionListener(e -> tableModel.filtrarPorRg(txtFiltro.getText()));
+        btnFiltrarNome.addActionListener(e -> buscarPorNome());
+        btnFiltrarSobrenome.addActionListener(e -> buscarPorSobrenome());
+        btnFiltrarCPF.addActionListener(e -> buscarPorCpf());
+        btnFiltrarRG.addActionListener(e -> buscarPorRg());
 
         btnLimparFiltro.addActionListener(e -> {
             txtFiltro.setText("");
-            tableModel.recarregar();
+            atualizarTabela();
         });
 
         // BOTAO COLUNAS
@@ -252,7 +261,7 @@ public class TelaManterClientes extends JFrame {
     // MÉTODOS PARA ABRIR TELAS
 
     private void abrirTelaCadastroInclusao() {
-        TelaCadastroCliente telaCadastro = new TelaCadastroCliente(this, null);
+        TelaCadastroCliente telaCadastro = new TelaCadastroCliente(this, null, clienteController);
         telaCadastro.setLocationRelativeTo(this);
         telaCadastro.setVisible(true);
         atualizarTabela();
@@ -265,7 +274,7 @@ public class TelaManterClientes extends JFrame {
             return;
         }
 
-        TelaCadastroCliente telaCadastro = new TelaCadastroCliente(this, clienteParaAtualizar);
+        TelaCadastroCliente telaCadastro = new TelaCadastroCliente(this, clienteParaAtualizar, clienteController);
         telaCadastro.setLocationRelativeTo(this);
         telaCadastro.setVisible(true);
         atualizarTabela();
@@ -307,6 +316,57 @@ public class TelaManterClientes extends JFrame {
         atualizarTabela();
     }
 
+    // FILTROS
+
+    private void buscarPorNome() {
+        try {
+            tableModel.setClientes(clienteController.buscarPorNome(txtFiltro.getText().trim()));
+        } catch (Exception e) {
+            mostrarErroBusca(e);
+        }
+    }
+
+    private void buscarPorSobrenome() {
+        try {
+            tableModel.setClientes(clienteController.buscarPorSobrenome(txtFiltro.getText().trim()));
+        } catch (Exception e) {
+            mostrarErroBusca(e);
+        }
+    }
+
+    private void buscarPorCpf() {
+        try {
+            Cliente cliente = clienteController.buscarPorCpf(txtFiltro.getText().replaceAll("\\D", ""));
+            tableModel.setClientes(listaComCliente(cliente));
+        } catch (Exception e) {
+            mostrarErroBusca(e);
+        }
+    }
+
+    private void buscarPorRg() {
+        try {
+            Cliente cliente = clienteController.buscarPorRg(txtFiltro.getText().replaceAll("\\D", ""));
+            tableModel.setClientes(listaComCliente(cliente));
+        } catch (Exception e) {
+            mostrarErroBusca(e);
+        }
+    }
+
+    private List<Cliente> listaComCliente(Cliente cliente) {
+        List<Cliente> clientes = new ArrayList<>();
+        if (cliente != null) {
+            clientes.add(cliente);
+        }
+        return clientes;
+    }
+
+    private void mostrarErroBusca(Exception e) {
+        JOptionPane.showMessageDialog(this,
+                "Erro ao buscar clientes: " + e.getMessage(),
+                "Erro",
+                JOptionPane.ERROR_MESSAGE);
+    }
+
     // EXCLUIR CLIENTE
 
     private void excluirCliente() {
@@ -332,17 +392,31 @@ public class TelaManterClientes extends JFrame {
         );
 
         if (resposta == JOptionPane.YES_OPTION) {
-            RepositorioDados.getInstance().removerCliente(clienteParaExcluir);
-            atualizarTabela();
-            JOptionPane.showMessageDialog(this, "Cliente excluído com sucesso.");
+            try {
+                clienteController.excluirCliente(clienteParaExcluir);
+                atualizarTabela();
+                JOptionPane.showMessageDialog(this, "Cliente excluído com sucesso.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Erro ao excluir cliente: " + ex.getMessage(),
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
     // ATUALIZAR TABELA
 
     public void atualizarTabela() {
-        List<Cliente> clientes = RepositorioDados.getInstance().getListaClientes();
-        tableModel.setClientes(clientes);
-        System.out.println("Tabela atualizada com " + clientes.size() + " clientes");
+        try {
+            List<Cliente> clientes = clienteController.listarClientes();
+            tableModel.setClientes(clientes);
+            System.out.println("Tabela atualizada com " + clientes.size() + " clientes");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao listar clientes: " + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

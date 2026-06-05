@@ -12,14 +12,18 @@ public class Cliente implements Comparable<Cliente> {
     private Conta conta;
     private LocalDateTime dataCadastro;
 
-    public Cliente(int id, String nome, String sobrenome, String rg, String cpf, String endereco) {
-        setId(id);
+    public Cliente(String nome, String sobrenome, String rg, String cpf, String endereco) {
         setNome(nome);
         setSobrenome(sobrenome);
         setRg(rg);
         setCpf(cpf);
         setEndereco(endereco);
         this.dataCadastro = LocalDateTime.now();
+    }
+
+    public Cliente(int id, String nome, String sobrenome, String rg, String cpf, String endereco) {
+        this(nome, sobrenome, rg, cpf, endereco);
+        setId(id);
     }
 
     public static void validarCpf(String cpf) {

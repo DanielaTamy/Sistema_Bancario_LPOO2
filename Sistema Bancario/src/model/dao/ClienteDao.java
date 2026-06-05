@@ -11,7 +11,7 @@ public interface ClienteDao extends Dao<Cliente>{
     
     Cliente getByRg(String rg) throws Exception;
 
-    Cliente getByNome(String nome) throws Exception;
+    List<Cliente> getByNome(String nome) throws Exception;
 
-    Cliente getBySobrenome(String sobrenome) throws Exception;
+    List<Cliente> getBySobrenome(String sobrenome) throws Exception;
 }
