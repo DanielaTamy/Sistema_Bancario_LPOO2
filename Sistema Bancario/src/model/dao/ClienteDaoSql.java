@@ -83,6 +83,7 @@ public class ClienteDaoSql implements ClienteDao {
             stmtAtualiza.setString(3, cliente.getRg());
             stmtAtualiza.setString(4, cliente.getCpf());
             stmtAtualiza.setString(5, cliente.getEndereco());
+            stmtAtualiza.setInt(6, cliente.getId());
             stmtAtualiza.executeUpdate();
         } 
     }
@@ -184,49 +185,51 @@ public class ClienteDaoSql implements ClienteDao {
     }
 
     @Override
-    public Cliente getByNome(String nome) throws Exception { 
-        String sqlPorNome = "SELECT * FROM CLIENTE WHERE nome = ?";
+    public List<Cliente> getByNome(String nome) throws Exception { 
+        String sqlPorNome = "SELECT * FROM CLIENTE WHERE nome LIKE ?";
         try (Connection connection = ConnectionFactory.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sqlPorNome)) {
             
-            stmt.setString(1, nome); 
+            stmt.setString(1, "%" + nome + "%"); 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new Cliente(
+                List<Cliente> clientes = new ArrayList<>();
+                while (rs.next()) {
+                    clientes.add(new Cliente(
                         rs.getInt("id"),
                         rs.getString("nome"),
                         rs.getString("sobrenome"),
                         rs.getString("rg"),
                         rs.getString("cpf"),
                         rs.getString("endereco")
-                    );
+                    ));
                 }
+                return clientes;
             }
         }
-        return null;
     }
 
     @Override
-    public Cliente getBySobrenome(String sobrenome) throws Exception { 
-        String sqlPorSobrenome = "SELECT * FROM CLIENTE WHERE sobrenome = ?";
+    public List<Cliente> getBySobrenome(String sobrenome) throws Exception { 
+        String sqlPorSobrenome = "SELECT * FROM CLIENTE WHERE sobrenome LIKE ?";
         try (Connection connection = ConnectionFactory.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sqlPorSobrenome)) {
             
-            stmt.setString(1, sobrenome); 
+            stmt.setString(1, "%" + sobrenome + "%"); 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new Cliente(
+                List<Cliente> clientes = new ArrayList<>();
+                while (rs.next()) {
+                    clientes.add(new Cliente(
                         rs.getInt("id"),
                         rs.getString("nome"),
                         rs.getString("sobrenome"),
                         rs.getString("rg"),
                         rs.getString("cpf"),
                         rs.getString("endereco")
-                    );
+                    ));
                 }
+                return clientes;
             }
         }
-        return null;
     }
 
 }

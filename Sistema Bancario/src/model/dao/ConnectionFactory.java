@@ -1,7 +1,9 @@
 package model.dao;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -25,9 +27,12 @@ public class ConnectionFactory {
     {
         if(properties==null){
             Properties props = new Properties();
-            FileInputStream file = new FileInputStream(
-                    "./Sistema Bancario/src/model/dao/DataBase.properties");
+            InputStream file = ConnectionFactory.class.getResourceAsStream("DataBase.properties");
+            if (file == null) {
+                file = Files.newInputStream(Paths.get("src", "model", "dao", "DataBase.properties"));
+            }
             props.load(file);
+            file.close();
             properties = props ;
         }
     }

@@ -2,6 +2,7 @@ package model.dao;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -10,8 +11,8 @@ import java.sql.Statement;
 public class DatabaseSeeder {
 
     public static void inicializarBanco() {
-        String caminhoSchema = "./Sistema Bancario/src/schema.sql";
-        String caminhoData = "./Sistema Bancario/src/data.sql"; 
+        Path caminhoSchema = localizarScriptSql("schema.sql");
+        Path caminhoData = localizarScriptSql("data.sql"); 
 
 
         try (Connection connection = ConnectionFactory.getConnection();
@@ -29,8 +30,16 @@ public class DatabaseSeeder {
         }
     }
 
-    private static void executarScriptSql(Statement stmt, String caminhoArquivo) throws IOException, SQLException {
-        String conteudoCompleto = new String(Files.readAllBytes(Paths.get(caminhoArquivo)));
+    private static Path localizarScriptSql(String nomeArquivo) {
+        Path caminhoNoProjeto = Paths.get("src", nomeArquivo);
+        if (Files.exists(caminhoNoProjeto)) {
+            return caminhoNoProjeto;
+        }
+        return Paths.get("Sistema Bancario", "src", nomeArquivo);
+    }
+
+    private static void executarScriptSql(Statement stmt, Path caminhoArquivo) throws IOException, SQLException {
+        String conteudoCompleto = new String(Files.readAllBytes(caminhoArquivo));
 
         String[] comandos = conteudoCompleto.split(";");
 
