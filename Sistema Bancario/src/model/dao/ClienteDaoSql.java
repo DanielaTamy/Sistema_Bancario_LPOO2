@@ -11,7 +11,7 @@ import model.Cliente;
 
 public class ClienteDaoSql implements ClienteDao {
 
-    private final String insert = "INSERT INTO CLIENTE (nome, sobrenome, rg, cpf, endereco, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private final String insert = "INSERT INTO CLIENTE (nome, sobrenome, rg, cpf, endereco, data_cadastro) VALUES (?, ?, ?, ?, ?, ?)";
     private final String select = "SELECT * FROM CLIENTE";
     private final String update = "UPDATE CLIENTE SET nome=?, sobrenome=?, rg=?, cpf=?, endereco=? WHERE id=?";
     private final String delete = "DELETE FROM CLIENTE WHERE id=?";
